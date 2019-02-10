@@ -1,0 +1,4 @@
+requests
+gql
+fuzzywuzzy
+giphy_client
