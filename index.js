@@ -6,12 +6,18 @@ const fs = require('fs');
 const _ = require('lodash');
 const bodyParser = require('body-parser');
 const exec = require('child_process').exec;
+const morgan = require('morgan');
+app.use((req, res, next) => {
+  console.log('REQUEST', req.url);
+  next();
+});
+//app.use(morgan('combined'));
 app.use(bodyParser());
 
 app.get('/menus', (req, res) => {
   const address = req.query.address;
   const numFoods = req.query.foods;
-  console.log(req.body);
+  console.log(req.body, address, numFoods);
   fs.readFile('types.json', 'utf8', function(err, data) {
     if (err) {
       console.log(err);
@@ -51,13 +57,8 @@ app.get('/menus', (req, res) => {
         };
       });
       //let userPreferences = req.user.preferences.map(preference => preference.category);
-      const userPreferences = req.body.preferences
-        .filter(prefObj => {
-          return prefObj[Object.keys(prefObj)[0]] == 1;
-        })
-        .map(prefObj => {
-          return Object.keys(prefObj)[0];
-        });
+      const userPreferences = Object.keys(req.query).map(key => key != 'address' && key != 'foods');
+
       console.log('PREFERENCES: ', userPreferences);
       let restaurantString = `'${JSON.stringify({
         address: response.data.address,
