@@ -11,7 +11,6 @@ app.use(bodyParser());
 app.get('/menus', (req, res) => {
   const address = req.query.address;
   const numFoods = req.query.foods;
-  console.log(req.body);
   fs.readFile('types.json', 'utf8', function(err, data) {
     if (err) {
       console.log(err);
@@ -22,7 +21,6 @@ app.get('/menus', (req, res) => {
     let json = JSON.parse(data);
 
     getRestaurants(address).then(response => {
-      console.log(response.data);
       let restaurants = response.data.restaurants.map(r => {
         return {
           apiKey: r.apiKey,
@@ -63,73 +61,80 @@ app.get('/menus', (req, res) => {
         address: response.data.address,
         restaurants: restaurants,
         preferences: userPreferences,
-        price: 5,
+        price: 20,
         foods: numFoods //numfoods??
       })}'`;
+
+      let restaurantKey = "";
+      let menuItems = [];
 
       exec(`python3 selection/restaurantSelection.py ${restaurantString}`, function(
         error,
         stdout,
         stderr
       ) {
-        if (error !== null) {
-          console.log('exec error: ' + error);
-        }
-
-        let restaurantKey = stdout.replace('\n', '');
-        getMenu(restaurantKey).then(menuResponse => {
-          console.log('MENURESPONSE', menuResponse.data);
-          let menuItems = _.flatten(
-            menuResponse.data.map(menu => {
-              return menu.items.map(item => {
-                return {
-                  apiKey: item.apiKey,
-                  basePrice: item.basePrice,
-                  name: item.name
-                    .replace(/\n/g, '')
-                    .replace(/\(/g, '')
-                    .replace(/\)/g, '')
-                    .replace(/"/g, '')
-                    .replace(/'/g, '')
-                };
-              });
-            })
-          );
-
+            if (error !== null) {
+              console.log('exec error: ' + error);
+              res.json({ restaurantKey: "", menuItems: [] });
+            } else {
+              restaurantKey = stdout.replace('\n', '');
+              if (restaurantKey.includes("ERROROHCRAP")) {
+                console.log("THERE WAS AN ERROR, NO RESTAURANT", stdout);
+                res.json({ restaurantKey: "", menuItems: [] });
+              } else {
+                getMenu(restaurantKey).then(menuResponse => {
+                  menuItems = _.flatten(
+                    menuResponse.data.map(menu => {
+                      return menu.items.map(item => {
+                        return {
+                          apiKey: item.apiKey,
+                          basePrice: item.basePrice,
+                          name: item.name
+                            .replace(/\n/g, '')
+                            .replace(/\(/g, '')
+                            .replace(/\)/g, '')
+                            .replace(/"/g, '')
+                            .replace(/'/g, '')
+                        };
+                      });
+                    })
+                  );
+                });
+              }
+            }  
           let menuString = `'${JSON.stringify({ menu: menuItems, price: 20 })}'`;
           let mkeys = [];
           let co = 0;
           for (let i = 0; i < numFoods; ++i) {
             exec(`python3 selection/menuSelection.py ${menuString}`, function(
-              // TODO: USER SETS PRICE
               error,
               stdout,
               stderr
             ) {
               ++co;
-              if (error !== null) {
+              let menuItemKeys = [];
+              if (error !== null || (stdout.replace('\n','')).includes("ERROROHCRAP")) {
                 console.log('exec error: ' + error);
+              } else {
+                menuItemKeys = JSON.parse(
+                  `{ "items": ${stdout.replace('\n', '').replace(/'/g, '"')}}`
+                ).items;
+                menuItemKeys.forEach(key => {
+                  mkeys.push(key);
+                  console.log(mkeys);
+                });
               }
-
-              let menuItemKeys = JSON.parse(
-                `{ "items": ${stdout.replace('\n', '').replace(/'/g, '"')}}`
-              ).items;
-
-              menuItemKeys.forEach(key => {
-                mkeys.push(key);
-                console.log(mkeys);
-              });
               if (co == numFoods) {
                 res.json({ restaurantKey: restaurantKey, menuItems: mkeys });
               }
             });
           }
           console.log('MKEYS: ', Object.keys(mkeys));
+          res.json({ restaurantKey: restaurantKey, menuItems: mkeys });
         });
       });
     });
   });
-});
 
 app.get('/categories', function(req, res) {
   fs.readFile('types.json', 'utf8', function(err, data) {

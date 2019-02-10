@@ -3,7 +3,11 @@ import json, sys
 
 
 def menuSelection(menuCollection, pricePref, menuPreferences):
-    print(menuFilter(menuCollection, pricePref, menuPreferences))
+    result = menuFilter(menuCollection, pricePref, menuPreferences)
+    if result is None:
+        print("ERROROHCRAP")
+    else:
+        print(result)
 
 
 # will later add menuPreferences parameter to better select menu item

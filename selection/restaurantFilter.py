@@ -10,20 +10,19 @@ def restaurantFilter(dictionary):
     foodPreference = dictionary["preferences"]
     address = dictionary["address"]
 
-    #newRestaurants = foodTimeDict(
-    #    restaurantCollection, foodPreference, dictionary)
-    with open('/tmp/somefile.txt', 'a') as the_file:
-        the_file.write('Hello\n')
-    newRestaurants = list(filter(lambda i: i['open'], restaurantCollection))
-    with open('/tmp/somefile.txt', 'a') as the_file:
-        the_file.write('checkedopen\n')
-    #ratingSorted = ratingSort(addYelpRatings(newRestaurants))[
-    #    :len(newRestaurants)//2]
-    #print(len(ratingSorted),file=sys.stderr)
+    openNewRestaurants = list(filter(lambda i: i['open'], restaurantCollection))
+    newRestaurants = foodTimeDict(openNewRestaurants, foodPreference)
+
     timeSorted = timeSort(addDrivingTime(
-        newRestaurants, address.get("longitude"), address.get("latitude")))
-    #print(len(timeSorted),file=sys.stderr)
-    if len(timeSorted) == 1:
+            newRestaurants, address.get("longitude"), address.get("latitude")))
+
+    ratingSorted = newRestaurants
+    if len(newRestaurants) > 2:
+        ratingSorted = ratingSort(addYelpRatings(timeSorted))[:len(timeSorted)//2]
+
+    if len(timeSorted) < 1:
+        return None
+    elif len(timeSorted) == 1:
         return timeSorted[0]
     elif len(timeSorted) < 10:
         return timeSorted[randrange(len(timeSorted) - 1)]
@@ -31,15 +30,17 @@ def restaurantFilter(dictionary):
         return timeSorted[randrange(10)]
 
 
-def foodTimeDict(restaurants, foodPreferences, dictionary):
-
-    # TODO: FIX TOTALPRICE TO INDICATE REFERENCE TO DELIVERY MINIMUM
-    totalPrice = dictionary.get("foods") * dictionary.get("price")
+def foodTimeDict(restaurants, foodPreferences):
     newRestaurants = []
-
     for restaurant in restaurants:
-        print(restaurant["open"],file=sys.stderr)
-        newRestaurants.append(restaurant)
+        myints = set(foodPreferences).intersection(set(restaurant["foodTypes"]))
+        if restaurant["open"] and (len(myints) > 0):
+            newRestaurants.append(restaurant)
+    if len(newRestaurants) < 1:
+        # Screw it we will add food that we don't like. :(
+        for restaurant in restaurants:        
+            if restaurant["open"]:
+                newRestaurants.append(restaurant)
 
     return newRestaurants
 

@@ -4,7 +4,7 @@ from fuzzywuzzy import fuzz
 from multiprocessing import Pool
 import logging
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__).addHandler(logging.NullHandler())
 
 # TEMP
 import sys

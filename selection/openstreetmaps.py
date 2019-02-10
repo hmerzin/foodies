@@ -1,9 +1,10 @@
+
 import requests
 import json
 import functools
 import logging
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__).addHandler(logging.NullHandler()) # Uncomment this to see errors.
 
 OSRMKEY = "5b3ce3597851110001cf62488dd14a1df3a24e80a7289a189b60edf0"
 OSRMrequestendpoint = "https://api.openrouteservice.org/matrix"
@@ -27,8 +28,8 @@ def addDrivingTime(restaurants, srcLon, srcLat):
         # distances to it.
         locations = "{},{}|".format(srcLon, srcLat)
         # Ugly code to make restaurants appear in the shape {lon},{lat}|... etc.
-        otherlocations = "|".join(map(
-            lambda i: "{},{}".format(i["longitude"],i["latitude"]), restaurants))
+        otherlocations = "|".join(list(map(
+            lambda i: "{},{}".format(i["longitude"],i["latitude"]), restaurants)))
         # We add the weird code to our street address location. Note that now
         # the index of each restaurant is its index in restaurants + 1. The
         # offset is from our current location.
