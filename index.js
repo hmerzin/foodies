@@ -102,6 +102,7 @@ app.get('/menus', (req, res) => {
                         );
 
                         let menuString = `'${JSON.stringify({ menu: menuItems, price: 20 })}'`;
+                        console.log(menuString);
                         let mkeys = [];
                         let co = 0;
                         for (let i = 0; i < numFoods; i++) {
