@@ -88,7 +88,6 @@ def addYelpRatings(restaurants):
                         N += 1
                         total += rating
             average = total / N if N > 1 else 0
-            print(average)
             for i, slice in enumerate(restaurantRatings):
                 for i2, rating in enumerate(slice):
                     restaurants[i*10 + i2]["rating"] = average if restaurantRatings[i][i2] is None else restaurantRatings[i][i2]

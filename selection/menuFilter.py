@@ -2,17 +2,14 @@ from random import randrange
 
 
 def menuFilter(menuCollection, pricePref, menuPreferences):
-    priceHigh = pricePref
-    priceLow = pricePref - pricePref * .5
+    priceHigh = pricePref + pricePref * .15
+    priceLow = pricePref - pricePref * .25
     newMenu = []
 
     for food in menuCollection:
         basePrice = food.get("basePrice")
         if (basePrice <= priceHigh and basePrice >= priceLow):
-            newMenu.append(
-                {
-                    "apiKey": food.get("apiKey")
-                })
+            newMenu.append(food)
 
     if len(newMenu) == 0:
         return evasiveManeuvers(menuCollection, pricePref)

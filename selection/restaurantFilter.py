@@ -2,7 +2,6 @@
 from random import randrange
 from yelpratings import addYelpRatings
 from openstreetmaps import addDrivingTime
-import sys
 
 
 def restaurantFilter(dictionary):
@@ -10,15 +9,15 @@ def restaurantFilter(dictionary):
     foodPreference = dictionary["preferences"]
     address = dictionary["address"]
 
-    openNewRestaurants = list(filter(lambda i: i['open'], restaurantCollection))
+    #openNewRestaurants = list(filter(lambda i: i['open'], restaurantCollection))
+    openNewRestaurants = restaurantCollection
     newRestaurants = foodTimeDict(openNewRestaurants, foodPreference)
+
+    if len(newRestaurants) > 2:
+        ratingSorted = ratingSort(addYelpRatings(newRestaurants))[:len(newRestaurants)//2]
 
     timeSorted = timeSort(addDrivingTime(
             newRestaurants, address.get("longitude"), address.get("latitude")))
-
-    ratingSorted = newRestaurants
-    if len(newRestaurants) > 2:
-        ratingSorted = ratingSort(addYelpRatings(timeSorted))[:len(timeSorted)//2]
 
     if len(timeSorted) < 1:
         return None
@@ -32,17 +31,32 @@ def restaurantFilter(dictionary):
 
 def foodTimeDict(restaurants, foodPreferences):
     newRestaurants = []
-    for restaurant in restaurants:
-        myints = set(foodPreferences).intersection(set(restaurant["foodTypes"]))
-        if restaurant["open"] and (len(myints) > 0):
-            newRestaurants.append(restaurant)
-    if len(newRestaurants) < 1:
-        # Screw it we will add food that we don't like. :(
-        for restaurant in restaurants:        
-            if restaurant["open"]:
+    numOpen = len(restaurants)
+
+    # if more than 15 are open, be picky
+    if numOpen > 15:
+        for restaurant in restaurants:
+            myints = len(set(foodPreferences).intersection(set(restaurant["foodTypes"])))
+            if (myints >= 1):
                 newRestaurants.append(restaurant)
 
-    return newRestaurants
+        return newRestaurants
+
+    # if less than 15 are open, don't be picky
+    elif numOpen <= 15 and numOpen > 0:
+        for restaurant in restaurants:
+            newRestaurants.append(restaurant)
+
+        return newRestaurants
+
+    # if 0 are open, throw an error
+    # WILL CHANGE LATER. GRABBING CLOSED RESTAURANTS FOR TESTS
+    else:
+        for restaurant in restaurants:
+            newRestaurants.append(restaurant)
+
+        return newRestaurants
+
 
 
 def ratingSort(restaurants):
