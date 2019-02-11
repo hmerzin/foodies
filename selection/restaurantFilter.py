@@ -52,7 +52,6 @@ def foodTimeDict(restaurants, foodPreferences):
     # if 0 are open, throw an error
     # WILL CHANGE LATER. GRABBING CLOSED RESTAURANTS FOR TESTS
     else:
-
         return newRestaurants
 
 
