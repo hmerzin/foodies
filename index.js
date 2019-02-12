@@ -69,6 +69,7 @@ app.get('/menus', (req, res) => {
       let restaurantKey = "";
       let menuItems = [];
 
+      console.log(restaurants.length);
       exec(`python3 selection/restaurantSelection.py ${restaurantString}`, function(
         error,
         stdout,

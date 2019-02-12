@@ -14,3 +14,4 @@ def menuSelection(menuCollection, pricePref, menuPreferences):
 dictionary = json.loads(sys.argv[1])
 
 menuSelection(dictionary.get("menu"), dictionary.get("price"), [])
+

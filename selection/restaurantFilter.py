@@ -9,9 +9,7 @@ def restaurantFilter(dictionary):
     foodPreference = dictionary["preferences"]
     address = dictionary["address"]
 
-    #openNewRestaurants = list(filter(lambda i: i['open'], restaurantCollection))
-    openNewRestaurants = restaurantCollection
-    newRestaurants = foodTimeDict(openNewRestaurants, foodPreference)
+    newRestaurants = foodTimeDict(restaurantCollection, foodPreference)
 
     if len(newRestaurants) > 2:
         ratingSorted = ratingSort(addYelpRatings(newRestaurants))[:len(newRestaurants)//2]
@@ -31,6 +29,7 @@ def restaurantFilter(dictionary):
 
 def foodTimeDict(restaurants, foodPreferences):
     newRestaurants = []
+    restaurants = list(filter(lambda i: i['open'], restaurants))
     numOpen = len(restaurants)
 
     # if more than 15 are open, be picky
@@ -62,6 +61,3 @@ def ratingSort(restaurants):
 
 def timeSort(restaurants):
     return sorted(restaurants, key=lambda i: i['drivingTime'])
-
-'''if(len(set(foodPreferences).intersection(restaurant.get("foodTypes"))) >= len(foodPreferences) / 2
-           and restaurant["open"]):'''
